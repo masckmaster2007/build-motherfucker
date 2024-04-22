@@ -179,6 +179,13 @@ runs:
         tarBall: false
         zipBall: false
         out-file-path: "cli"
+    
+    - name: Download iOS libcurl
+      shell: bash
+      run: |
+        curl -L https://github.com/tls-inspector/curl-ios/releases/download/8.7.1/curl.xcframework.zip -o ~/curl.xcframework.zip
+        unzip ~/curl.xcframework.zip
+      if: steps.platform.outputs.id == 'ios'
 
     - name: Setup CLI
       shell: bash
