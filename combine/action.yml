@@ -90,6 +90,12 @@ runs:
     - uses: geekyeggo/delete-artifact@v2
       if: ${{ inputs.delete-artifacts }}
       with:
+          name: geode-build-ios
+          failOnError: false
+
+    - uses: geekyeggo/delete-artifact@v2
+      if: ${{ inputs.delete-artifacts }}
+      with:
           name: geode-build-android32
           failOnError: false
 
