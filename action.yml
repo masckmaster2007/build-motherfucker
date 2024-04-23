@@ -201,13 +201,12 @@ runs:
         geode profile add --name GithubActions "$CLI_PROFILE/GeometryDash.exe" win
 
         geode sdk install "${{ github.workspace }}/geode-sdk-clone"
-        export GEODE_SDK="${{ github.workspace }}/geode-sdk-clone"
 
         # silly github actions wont refresh the env
         export GEODE_SDK="${{ github.workspace }}/geode-sdk-clone"
         echo "GEODE_SDK=$GEODE_SDK" >> $GITHUB_ENV
 
-        if [ "${{ inputs.sdk }}" == "nightly" || ${{ steps.platform.outputs.target_id }} == "ios" ]; then
+        if [ "${{ inputs.sdk }}" == "nightly" ]; then
           geode sdk update nightly
           geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }}
         elif [ "${{ inputs.sdk }}" == "latest" ]; then
@@ -217,8 +216,14 @@ runs:
           export MOD_JSON_PATH=$(find . -name "mod.json" -not -path "./geode-sdk-clone/*" -print -quit)
           export TARGET_GEODE_VERSION=$(jq -r '.geode' $MOD_JSON_PATH)
           echo "Updating to version $TARGET_GEODE_VERSION from $MOD_JSON_PATH"
-          geode sdk update "$TARGET_GEODE_VERSION"
-          geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }} --version "$TARGET_GEODE_VERSION"
+          echo "!! WARNING !!"
+          echo "building against NIGHTLY as WORKAROUND"
+          geode sdk update nightly
+          geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }}
+
+          #uncomment these when geode ios releases:
+          # geode sdk update "$TARGET_GEODE_VERSION"
+          # geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }} --version "$TARGET_GEODE_VERSION"
         fi
         
         export CPM_CACHE="${{ github.workspace }}/cpm-cache"
