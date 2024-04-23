@@ -172,7 +172,7 @@ runs:
     - name: Download CLI
       uses: robinraju/release-downloader@v1.9
       with:
-        repository: geode-sdk/cli
+        repository: RoootTheFox/cli
         latest: ${{ inputs.cli == 'latest' }}
         tag: ${{ inputs.cli != 'latest' && inputs.cli || '' }}
         fileName: "*-${{ steps.platform.outputs.id }}.zip"
@@ -200,13 +200,8 @@ runs:
         mkdir -p "$CLI_PROFILE/Contents/geode/mods"
         geode profile add --name GithubActions "$CLI_PROFILE/GeometryDash.exe" win
 
-        if [ ${{ steps.platform.outputs.target_id }} == "ios" ]; then
-          echo "ugly hack !!!"
-          git clone -b ios https://github.com/FireMario211/geode "${{ github.workspace }}/geode-sdk-clone"
-          export GEODE_SDK="${{ github.workspace }}/geode-sdk-clone"
-        else
-          geode sdk install "${{ github.workspace }}/geode-sdk-clone"
-        fi
+        geode sdk install "${{ github.workspace }}/geode-sdk-clone"
+        export GEODE_SDK="${{ github.workspace }}/geode-sdk-clone"
 
         # silly github actions wont refresh the env
         export GEODE_SDK="${{ github.workspace }}/geode-sdk-clone"
@@ -221,16 +216,9 @@ runs:
         else
           export MOD_JSON_PATH=$(find . -name "mod.json" -not -path "./geode-sdk-clone/*" -print -quit)
           export TARGET_GEODE_VERSION=$(jq -r '.geode' $MOD_JSON_PATH)
-          if [ ${{ steps.platform.outputs.target_id }} == "ios" ]; then
-            echo "ugly hack numero dos !!"
-            pushd "$GEODE_SDK"
-            cmake -B build -DGEODE_TARGET_PLATFORM=iOS -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_SYSTEM_NAME=iOS -DGEODE_DONT_BUILD_TEST_MODS=ON && cmake --build build --config Debug -j4
-            popd "$GEODE_SDK"
-          else
-            echo "Updating to version $TARGET_GEODE_VERSION from $MOD_JSON_PATH"
-            geode sdk update "$TARGET_GEODE_VERSION"
-            geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }} --version "$TARGET_GEODE_VERSION"
-          fi
+          echo "Updating to version $TARGET_GEODE_VERSION from $MOD_JSON_PATH"
+          geode sdk update "$TARGET_GEODE_VERSION"
+          geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }} --version "$TARGET_GEODE_VERSION"
         fi
         
         export CPM_CACHE="${{ github.workspace }}/cpm-cache"
@@ -252,7 +240,7 @@ runs:
           CMAKE_EXTRA_ARGS="-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-${{ inputs.android-min-sdk }}"
         elif [ ${{ steps.platform.outputs.target_id }} = "ios" ]; then
           echo "HAIIIIIIIIIIIIIIIIIIIIIII I RAN MEOW MEOW"
-          CMAKE_EXTRA_ARGS="-DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 -DCMAKE_SYSTEM_NAME=iOS -DGEODE_DONT_BUILD_TEST_MODS=ON -DGEODE_LINK_NIGHTLY=ON"
+          CMAKE_EXTRA_ARGS="-DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 -DCMAKE_SYSTEM_NAME=iOS -DGEODE_DONT_BUILD_TEST_MODS=ON"
         elif [ ${{ steps.platform.outputs.target_id }} = "win" ]; then
           # geode itself sets these, but only since beta.20
           export CFLAGS="--target=i686-windows-msvc"
