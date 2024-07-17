@@ -214,9 +214,11 @@ runs:
       if: steps.platform.outputs.target_id != 'ios'
 
     - name: Setup CLI
-      uses: geode-sdk/cli/.github/actions/setup@main
+      #uses: geode-sdk/cli/.github/actions/setup@main
+      uses: geode-ios/build-geode-mod/ios-cli-setup@coop/update-upstream
       with:
         version: ${{ inputs.cli }}
+        platform: ${{ steps.platform.outputs.target_id }}
 
     - name: Setup Geode SDK
       shell: bash
