@@ -42,7 +42,7 @@ runs:
     uses: robinraju/release-downloader@v1.10
     if: inputs.platform == 'ios' && steps.platform.outputs.host == 'mac'
     with:
-      repository: geode-ios/cli
+      repository: geode-catgirls/cli
       latest: ${{ inputs.version == 'latest' }}
       tag: ${{ inputs.version != 'latest' && inputs.version || '' }}
       fileName: '*-${{ steps.platform.outputs.host }}.zip'

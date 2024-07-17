@@ -192,7 +192,7 @@ runs:
     - name: Download CLI (iOS)
       uses: robinraju/release-downloader@v1.9
       with:
-        repository: geode-ios/cli
+        repository: geode-catgirls/cli
         latest: ${{ inputs.cli == 'latest' }}
         tag: ${{ inputs.cli != 'latest' && inputs.cli || '' }}
         fileName: "*-${{ steps.platform.outputs.id }}.zip"
@@ -215,7 +215,7 @@ runs:
 
     - name: Setup CLI
       #uses: geode-sdk/cli/.github/actions/setup@main
-      uses: geode-ios/build-geode-mod/ios-cli-setup@coop/update-upstream
+      uses: geode-catgirls/build-geode-mod/ios-cli-setup@main
       with:
         version: ${{ inputs.cli }}
         platform: ${{ steps.platform.outputs.target_id }}
@@ -283,6 +283,7 @@ runs:
         if [ "${{ inputs.use-lto }}" = "true" ]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON"
         fi
+
         cmake -B build -DCMAKE_BUILD_TYPE=${{ inputs.build-config }} -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DGEODE_CODEGEN_CMAKE_ARGS="-DCMAKE_C_COMPILER=clang;-DCMAKE_CXX_COMPILER=clang++;-G Ninja" -G Ninja $CMAKE_EXTRA_ARGS -DGEODE_DONT_INSTALL_MODS=ON -DGEODE_TARGET_PLATFORM=${{ steps.platform.outputs.target }} ${{ inputs.configure-args }}
         cmake --build build --config ${{ inputs.build-config }} ${{ inputs.build-args }}
 

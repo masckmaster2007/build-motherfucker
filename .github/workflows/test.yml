@@ -38,7 +38,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          repository: geode-ios/example-mod
+          repository: geode-catgirls/example-mod
           path: example-mod-test
           #repository: geode-sdk/texturelfr
           #path: textureldr
@@ -51,6 +51,9 @@ jobs:
           GEODE_VERSION=$(curl -s https://api.github.com/repos/geode-sdk/geode/releases/latest)
           GEODE_VERSION=$(echo $GEODE_VERSION | jq -r .tag_name)
           GEODE_VERSION=${GEODE_VERSION#v}
+          if [ $GEODE_VERSION == null ]; then 
+            GEODE_VERSION="3.2.0"
+          fi
 
           # Set path of mod.json file
           mod_json_path="example-mod-test/mod.json"
