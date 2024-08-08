@@ -62,6 +62,10 @@ inputs:
     description: Whether to use LTO (Link Time Optimization) via the CMAKE_INTERPROCEDURAL_OPTIMIZATION flag, improving build size. Defaults to true
     required: false
     default: true
+  gh-pat:
+    description: GitHub personal access token for downloading stuffs
+    required: false
+    default: no token lol
 
 outputs:
   build-output:
@@ -189,36 +193,21 @@ runs:
       shell: bash
       run: echo "GEODE_BINDINGS_REPO_PATH=$GITHUB_WORKSPACE/bindings-repo" >> $GITHUB_ENV
 
-    - name: Download CLI (iOS)
-      uses: robinraju/release-downloader@v1.9
-      with:
-        repository: geode-catgirls/cli
-        latest: ${{ inputs.cli == 'latest' }}
-        tag: ${{ inputs.cli != 'latest' && inputs.cli || '' }}
-        fileName: "*-${{ steps.platform.outputs.id }}.zip"
-        tarBall: false
-        zipBall: false
-        out-file-path: "cli"
-      if: steps.platform.outputs.target_id == 'ios'
-
-    - name: Download CLI (not iOS)
-      uses: robinraju/release-downloader@v1.9
-      with:
-        repository: geode-sdk/cli
-        latest: ${{ inputs.cli == 'latest' }}
-        tag: ${{ inputs.cli != 'latest' && inputs.cli || '' }}
-        fileName: "*-${{ steps.platform.outputs.id }}.zip"
-        tarBall: false
-        zipBall: false
-        out-file-path: "cli"
-      if: steps.platform.outputs.target_id != 'ios'
-
     - name: Setup CLI
       #uses: geode-sdk/cli/.github/actions/setup@main
       uses: geode-catgirls/build-geode-mod/ios-cli-setup@main
       with:
         version: ${{ inputs.cli }}
         platform: ${{ steps.platform.outputs.target_id }}
+
+    - name: Download Geode SDK
+      if: steps.platform.outputs.target_id == 'ios'
+      uses: actions/checkout@v4
+      with:
+        repository: geode-catgirls/geode-cgs
+        token: ${{ inputs.gh-pat }}
+        ref: nightly
+        path: geode-sdk-clone
 
     - name: Setup Geode SDK
       shell: bash
@@ -230,7 +219,9 @@ runs:
         mkdir -p "$CLI_PROFILE/Contents/geode/mods"
         geode profile add --name GithubActions "$CLI_PROFILE/GeometryDash.exe" win
 
-        geode sdk install "${{ github.workspace }}/geode-sdk-clone"
+        if [ "${{ steps.platform.outputs.target_id }}" != "ios" ]; then
+          geode sdk install "${{ github.workspace }}/geode-sdk-clone"
+        fi
 
         # silly github actions wont refresh the env
         export GEODE_SDK="${{ github.workspace }}/geode-sdk-clone"
@@ -248,7 +239,14 @@ runs:
           echo "Updating to version $TARGET_GEODE_VERSION from $MOD_JSON_PATH"
           echo "!! WARNING !!"
           echo "building against NIGHTLY as WORKAROUND"
-          geode sdk update nightly
+          if [ "${{ steps.platform.outputs.target_id }}" == "ios" ]; then
+            echo "doin ios stuff and already installed meow meow, editing geode cli config"
+            echo "Old Config: $(cat /Users/Shared/Geode/config.json)"
+            echo $(cat /Users/Shared/Geode/config.json | jq '."sdk-nightly" = true | ."sdk-version" = null') > /Users/Shared/Geode/config.json
+            echo "New Config: $(cat /Users/Shared/Geode/config.json)"
+          else
+            geode sdk update nightly
+          fi
           geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }}
 
           #uncomment these when geode ios releases:
