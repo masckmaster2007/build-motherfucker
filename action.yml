@@ -210,6 +210,17 @@ runs:
         ref: nightly
         path: geode-sdk-clone
 
+    - name: Download binaries
+      if: steps.platform.outputs.target_id == 'ios'
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: geode-catgirls/geode-cgs
+        token: ${{ inputs.gh-pat }}
+        tag: nightly
+        filename: geode-*-ios.zip
+        out-file-path: ${{ github.workspace }}/geode-sdk-clone/bin/nightly
+        extract: true
+
     - name: Setup Geode SDK
       shell: bash
       run: |
@@ -247,14 +258,15 @@ runs:
             echo "New Config: $(cat /Users/Shared/Geode/config.json)"
           else
             geode sdk update nightly
+            geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }}
           fi
-          geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }}
 
           #uncomment these when geode ios releases:
           # geode sdk update "$TARGET_GEODE_VERSION"
           # geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }} --version "$TARGET_GEODE_VERSION"
         else
           geode sdk update ${{ inputs.sdk }}
+          # because it was still getting old old old binaries
           geode sdk install-binaries --platform ${{ steps.platform.outputs.target_id }}
         fi
 
