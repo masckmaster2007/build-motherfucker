@@ -213,7 +213,7 @@ runs:
       if: steps.platform.outputs.target_id == 'ios'
       uses: robinraju/release-downloader@v1
       with:
-        repository: geode-sdk/geode
+        repository: masckmaster2007/geode
         tag: nightly
         filename: geode-*-ios.zip
         out-file-path: ${{ github.workspace }}/geode-sdk-clone/bin/nightly
