@@ -205,7 +205,7 @@ runs:
       if: steps.platform.outputs.target_id == 'ios'
       uses: actions/checkout@v4
       with:
-        repository: geode-sdk/geode
+        repository: masckmaster2007/geode
         ref: nightly
         path: geode-sdk-clone
 
